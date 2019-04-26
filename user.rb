@@ -1,7 +1,12 @@
 require "pry"
 
 class User
+  @@all_users = []
   attr_accessor :first_name, :last_name, :email
+
+  def self.all
+    @@all_users
+  end
 
   def self.create(first_name:, last_name:, email:)
     if User.is_email_in_use?(email)
@@ -18,20 +23,20 @@ class User
   end
 
   def self.write_new_user_to_db(new_user)
-    users = self.all.map(&:to_h) << new_user.to_h
+    users = @@all_users.map(&:to_h) << new_user.to_h
     File.write("users.json", users.to_json)
   end
 
-  def self.all
+  def self.read_file_for_users
     users_json = File.exist?("users.json") ? File.read("users.json") : "[]"
     parsed_users = JSON.parse(users_json, symbolize_names: true)
-    parsed_users.map do |user|
+    @@all_users = parsed_users.map do |user|
       User.new(first_name: user[:first_name], last_name: user[:last_name], email: user[:email])
     end
   end
 
   def self.is_email_in_use? (email)
-    self.all.map(&:to_h).any? { |user| user.has_value?(email) }
+    @@all_users.map(&:to_h).any? { |user| user.has_value?(email) }
   end
 
   def initialize(first_name:,
@@ -51,8 +56,20 @@ class User
     {first_name: first_name, last_name: last_name, email: email}
   end
 
+  def update(first_name: @first_name, last_name: @last_name, email: @email)
+    @first_name = first_name
+    @last_name = last_name
+    if email == @email
+      @email
+    elsif User.is_email_in_use?(email)
+      puts "Email in use"
+    else
+      @email = email
+    end
+    User.write_new_user_to_db(self)
+  end
 end
-
+User.read_file_for_users
 brooks = User.create(first_name: "Brooks", last_name: "Swinnerton", email: "brooks@test.com")
 steve = User.create(first_name: "Steve", last_name: "Ryan", email: "steve@test.com")
 binding.pry
