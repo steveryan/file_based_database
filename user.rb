@@ -17,13 +17,12 @@ class User
          last_name: last_name,
          email: email
        )
-       write_new_user_to_db(new_user)
        new_user
      end
   end
 
-  def self.write_new_user_to_db(new_user)
-    users = @@all_users.map(&:to_h) << new_user.to_h
+  def self.write_new_user_to_db
+    users = @@all_users.uniq.map(&:to_h)
     File.write("users.json", users.to_json)
   end
 
@@ -46,6 +45,8 @@ class User
     @first_name = first_name
     @last_name = last_name
     @email = email
+    @@all_users << self
+    User.write_new_user_to_db
   end
 
   def full_name
@@ -66,7 +67,8 @@ class User
     else
       @email = email
     end
-    User.write_new_user_to_db(self)
+    User.write_new_user_to_db
+    self
   end
 end
 User.read_file_for_users
