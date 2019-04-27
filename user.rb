@@ -86,3 +86,4 @@ end
 User.read_file_for_users
 brooks = User.create(first_name: "Brooks", last_name: "Swinnerton", email: "brooks@test.com")
 steve = User.create(first_name: "Steve", last_name: "Ryan", email: "steve@test.com")
+binding.pry
