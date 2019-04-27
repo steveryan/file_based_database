@@ -1,3 +1,5 @@
+require "pry"
+
 class User
   @@all_users = []
   attr_accessor :first_name, :last_name, :email
