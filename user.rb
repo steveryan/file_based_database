@@ -1,11 +1,15 @@
 require "pry"
 
 class User
-  @@all_users = []
+  @all_users = []
   attr_accessor :first_name, :last_name, :email
 
   def self.all
-    @@all_users
+    @all_users
+  end
+
+  def self.all=(array_of_users)
+    @all_users = array_of_users
   end
 
   def self.create(first_name:, last_name:, email:)
@@ -22,24 +26,24 @@ class User
   end
 
   def self.write_new_user_to_db
-    users = @@all_users.uniq.map(&:to_h)
+    users = @all_users.uniq.map(&:to_h)
     File.write("users.json", users.to_json)
   end
 
   def self.read_file_for_users
     users_json = File.exist?("users.json") ? File.read("users.json") : "[]"
     parsed_users = JSON.parse(users_json, symbolize_names: true)
-    @@all_users = parsed_users.map do |user|
+    @all_users = parsed_users.map do |user|
       User.new(first_name: user[:first_name], last_name: user[:last_name], email: user[:email])
     end
   end
 
   def self.is_email_in_use? (email)
-    @@all_users.map(&:to_h).any? { |user| user.has_value?(email) }
+    @all_users.map(&:to_h).any? { |user| user.has_value?(email) }
   end
 
   def self.destroy_all
-    @@all_users = []
+    @all_users = []
     User.write_new_user_to_db
     puts "All users deleted"
   end
@@ -51,7 +55,7 @@ class User
     @first_name = first_name
     @last_name = last_name
     @email = email
-    @@all_users << self
+    User.all=( User.all << self )
     User.write_new_user_to_db
   end
 
@@ -78,7 +82,7 @@ class User
   end
 
   def destroy
-    @@all_users.delete(self)
+    User.all.delete(self)
     User.write_new_user_to_db
     puts "User has been deleted"
   end
