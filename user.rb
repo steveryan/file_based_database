@@ -1,5 +1,3 @@
-require "pry"
-
 class User
   @@all_users = []
   attr_accessor :first_name, :last_name, :email
@@ -10,7 +8,7 @@ class User
 
   def self.create(first_name:, last_name:, email:)
     if User.is_email_in_use?(email)
-       return puts "Sorry this email is taken"
+       return puts "Sorry, the email #{email} is already in use"
      else
        new_user = new(
          first_name: first_name,
@@ -36,6 +34,12 @@ class User
 
   def self.is_email_in_use? (email)
     @@all_users.map(&:to_h).any? { |user| user.has_value?(email) }
+  end
+
+  def self.destroy_all
+    @@all_users = []
+    User.write_new_user_to_db
+    puts "All users deleted"
   end
 
   def initialize(first_name:,
@@ -70,8 +74,13 @@ class User
     User.write_new_user_to_db
     self
   end
+
+  def destroy
+    @@all_users.delete(self)
+    User.write_new_user_to_db
+    puts "User has been deleted"
+  end
 end
 User.read_file_for_users
 brooks = User.create(first_name: "Brooks", last_name: "Swinnerton", email: "brooks@test.com")
 steve = User.create(first_name: "Steve", last_name: "Ryan", email: "steve@test.com")
-binding.pry
