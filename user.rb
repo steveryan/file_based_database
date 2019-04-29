@@ -14,7 +14,7 @@ class User
 
   def self.create(first_name:, last_name:, email:)
     if User.is_email_in_use?(email)
-       return puts "Sorry, the email #{email} is already in use"
+       raise ArgumentError "Sorry, the email #{email} is already in use"
      else
        new_user = new(
          first_name: first_name,
